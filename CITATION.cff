@@ -1,0 +1,14 @@
+cff-version: 1.2.0
+title: "HIRA Pharma Investigation Toolkit"
+abstract: "Open-source data analysis toolkit for investigative journalism using the Health Insurance Review & Assessment Service (HIRA) OpenAPI in South Korea."
+authors:
+  - family-names: "[성]"
+    given-names: "[이름]"
+license: MIT
+repository-code: "https://github.com/[유저명]/hira-investigation-public"
+keywords:
+  - data-journalism
+  - investigative-journalism
+  - public-health
+  - korea
+  - hira

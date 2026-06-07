@@ -1,0 +1,71 @@
+:root {
+  --bg: #f5f6f4;
+  --panel: #ffffff;
+  --line: #dce2dc;
+  --text: #1d2422;
+  --muted: #68716d;
+  --indigo: #4f5aa8;
+  --teal: #177d72;
+  --amber: #c87816;
+  --rose: #b64b5a;
+  --green: #4e8b46;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; background: var(--bg); color: var(--text); font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Apple SD Gothic Neo", sans-serif; -webkit-font-smoothing: antialiased; }
+main { max-width: 1280px; margin: 0 auto; padding: 16px 24px 60px; }
+.topbar { display: flex; justify-content: space-between; align-items: flex-end; padding: 24px; max-width: 1280px; margin: 0 auto; border-bottom: 1px solid var(--line); }
+.topbar h1 { margin: 0; font-size: 24px; }
+.topbar .eyebrow { margin: 0 0 6px; font-size: 11px; letter-spacing: 1px; text-transform: uppercase; color: var(--muted); }
+.topbar__meta { font-size: 12px; color: var(--muted); display: flex; gap: 16px; }
+
+.kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin: 20px 0 16px; }
+.kpi { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 16px 18px; }
+.kpi__label { font-size: 11px; color: var(--muted); letter-spacing: 0.5px; text-transform: uppercase; }
+.kpi strong { display: block; font-size: 26px; margin: 6px 0 4px; font-weight: 700; }
+.kpi__sub { font-size: 11px; color: var(--muted); }
+
+.dashboard-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
+.panel { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 16px 18px; }
+.panel--wide { grid-column: 1 / -1; }
+.panel__head { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px; }
+.panel h2 { margin: 0 0 2px; font-size: 16px; }
+.panel p { margin: 0; font-size: 12px; color: var(--muted); }
+
+.toolbar { display: flex; gap: 12px; margin-bottom: 10px; }
+.field { display: flex; flex-direction: column; gap: 4px; flex: 1; max-width: 240px; }
+.field label { font-size: 11px; color: var(--muted); }
+.field select, .field input { padding: 6px 10px; border: 1px solid var(--line); border-radius: 6px; background: #fff; font-size: 13px; }
+
+table { width: 100%; border-collapse: collapse; font-size: 13px; }
+thead th { text-align: left; font-weight: 600; padding: 8px 8px; border-bottom: 1px solid var(--line); color: var(--muted); }
+tbody td { padding: 8px 8px; border-bottom: 1px solid var(--line); }
+.numeric { text-align: right; font-variant-numeric: tabular-nums; }
+.table-wrap { max-height: 360px; overflow-y: auto; }
+
+.legend { display: flex; flex-wrap: wrap; gap: 10px 16px; margin-top: 10px; font-size: 12px; }
+.legend__item { display: flex; gap: 6px; align-items: center; }
+.swatch { width: 12px; height: 12px; border-radius: 3px; display: inline-block; }
+
+.timeline { list-style: none; padding: 0; margin: 0; display: grid; gap: 8px; }
+.timeline li { padding: 8px 12px; background: #f8faf7; border-left: 3px solid var(--indigo); border-radius: 4px; font-size: 13px; }
+.timeline li.terminal { border-left-color: var(--rose); }
+.timeline li.active { border-left-color: var(--amber); }
+.timeline .date { font-weight: 600; color: var(--muted); margin-right: 10px; }
+
+.status { padding: 2px 8px; border-radius: 10px; font-size: 11px; font-weight: 600; }
+.status--complete { background: #d8efe9; color: var(--teal); }
+.status--partial { background: #fce5c5; color: var(--amber); }
+.status--pending { background: #efeef2; color: var(--muted); }
+.status--missing { background: #f7d6db; color: var(--rose); }
+
+.progress-bar { height: 6px; background: #efeef2; border-radius: 3px; overflow: hidden; }
+.progress-bar__fill { height: 100%; background: var(--teal); transition: width .3s ease; }
+
+.notes { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 14px 18px; margin-top: 12px; font-size: 13px; color: var(--muted); }
+.notes h2 { font-size: 14px; margin: 0 0 8px; color: var(--text); }
+.notes ul { margin: 0; padding-left: 20px; line-height: 1.6; }
+
+@media (max-width: 900px) {
+  .kpi-grid { grid-template-columns: repeat(2, 1fr); }
+  .dashboard-grid { grid-template-columns: 1fr; }
+}

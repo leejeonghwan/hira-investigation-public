@@ -1,0 +1,136 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>의심 의약품 8종 — 시리즈 보도 대시보드</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="data.js" defer></script>
+    <script src="app.js" defer></script>
+  </head>
+  <body>
+    <header class="topbar">
+      <div>
+        <p class="eyebrow">HIRA OpenAPI · cmpn_sick A 트랙</p>
+        <h1>의심 의약품 8종 시리즈 대시보드</h1>
+      </div>
+      <div class="topbar__meta">
+        <span id="generatedAt">-</span>
+        <span id="progressLabel">-</span>
+      </div>
+    </header>
+
+    <main>
+      <section class="kpi-grid" aria-label="핵심 지표">
+        <article class="kpi">
+          <span class="kpi__label">전체 진척</span>
+          <strong id="kpiProgress">-</strong>
+          <span class="kpi__sub">전 약물·전 기간 조합 기준</span>
+        </article>
+        <article class="kpi">
+          <span class="kpi__label">수집 행수</span>
+          <strong id="kpiRows">-</strong>
+          <span class="kpi__sub">cmpn × 월 × 상병</span>
+        </article>
+        <article class="kpi">
+          <span class="kpi__label">2024 청구 합계</span>
+          <strong id="kpiAmount">-</strong>
+          <span class="kpi__sub">8종 합산 (건강보험·조제기준)</span>
+        </article>
+        <article class="kpi">
+          <span class="kpi__label">사용된 상병 종류</span>
+          <strong id="kpiSicks">-</strong>
+          <span class="kpi__sub">2015~2024 누적</span>
+        </article>
+      </section>
+
+      <section class="dashboard-grid">
+        <article class="panel panel--wide">
+          <div class="panel__head">
+            <div>
+              <h2>약물별 진척 상태</h2>
+              <p>cmpnCd 갯수와 수집 완료 비율</p>
+            </div>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>약물</th>
+                  <th>한국명</th>
+                  <th>cmpnCd</th>
+                  <th>완료/예상</th>
+                  <th>진척</th>
+                  <th>상태</th>
+                </tr>
+              </thead>
+              <tbody id="drugStatusRows"></tbody>
+            </table>
+          </div>
+        </article>
+
+        <article class="panel panel--wide">
+          <div class="panel__head">
+            <div>
+              <h2>약물별 연도별 청구금액</h2>
+              <p>10년 시계열 — 정책 시점 마커 포함</p>
+            </div>
+          </div>
+          <canvas id="seriesCanvas" height="320" aria-label="약물별 시계열 차트"></canvas>
+          <div id="seriesLegend" class="legend"></div>
+        </article>
+
+        <article class="panel">
+          <div class="panel__head">
+            <div>
+              <h2>2024 청구액 비교</h2>
+              <p>(또는 가장 최근 완성 연도)</p>
+            </div>
+          </div>
+          <canvas id="amountCanvas" height="320"></canvas>
+        </article>
+
+        <article class="panel">
+          <div class="panel__head">
+            <div>
+              <h2>상병 다양성</h2>
+              <p>약물별 누적 사용 상병 수</p>
+            </div>
+          </div>
+          <canvas id="sicksCanvas" height="320"></canvas>
+        </article>
+
+        <article class="panel panel--wide">
+          <div class="panel__head">
+            <div>
+              <h2>2024 상위 상병 (약물 선택)</h2>
+              <p>비핵심 상병 비중 검증용</p>
+            </div>
+          </div>
+          <div class="toolbar">
+            <div class="field">
+              <label for="drugSelect">약물</label>
+              <select id="drugSelect"></select>
+            </div>
+          </div>
+          <canvas id="sicknessCanvas" height="340"></canvas>
+        </article>
+
+        <article class="panel panel--wide">
+          <div class="panel__head">
+            <div>
+              <h2>정책 이벤트 타임라인</h2>
+              <p>각 약물의 임상재평가·퇴출·본인부담 변화</p>
+            </div>
+          </div>
+          <ul class="timeline" id="timelineList"></ul>
+        </article>
+      </section>
+
+      <section class="notes" aria-label="해석상 주의">
+        <h2>해석상 주의</h2>
+        <ul id="notesList"></ul>
+      </section>
+    </main>
+  </body>
+</html>
