@@ -70,6 +70,43 @@ def line_chart(pairs, width=620, h=190):
       <text x="4" y="{y(mx):.1f}" fill="#6b7280" font-size="10">{won(mx)}</text>
     </svg>'''
 
+def stacked_bars(years, core, noncore, width=620, h=230):
+    """연도별 치매핵심(초록)+비치매(빨강) 누적 막대."""
+    n=len(years); mx=max(c+nc for c,nc in zip(core,noncore))
+    padL=44; padR=14; padT=14; padB=26
+    pw=width-padL-padR; ph=h-padT-padB
+    bw=pw/n*0.62; step=pw/n
+    out=[f'<svg viewBox="0 0 {width} {h}" width="100%">']
+    def yc(v): return padT+ph*(1-v/mx)
+    for i,(c,nc) in enumerate(zip(core,noncore)):
+        cx=padL+step*i+step*0.19
+        hnc=ph*nc/mx; hc=ph*c/mx
+        out.append(f'<rect x="{cx:.1f}" y="{yc(c+nc):.1f}" width="{bw:.1f}" height="{hnc:.1f}" fill="#ff6b6b"/>')
+        out.append(f'<rect x="{cx:.1f}" y="{yc(c):.1f}" width="{bw:.1f}" height="{hc:.1f}" fill="#4fd18b"/>')
+        out.append(f'<text x="{cx+bw/2:.1f}" y="{h-8}" text-anchor="middle" fill="#9aa3b2" font-size="10">{years[i][2:]}</text>')
+    out.append(f'<text x="4" y="{padT+8}" fill="#6b7280" font-size="10">{won(mx)}</text>')
+    out.append('</svg>')
+    return "\n".join(out)
+
+def multiline(years, series, width=620, h=250):
+    """series: list of (label, values[], color). 공유 스케일 다중선 + 범례."""
+    n=len(years); mx=max(max(v) for _,v,_ in series)
+    padL=44; padR=14; padT=14; padB=26
+    pw=width-padL-padR; ph=h-padT-padB
+    def x(i): return padL+pw*i/max(1,n-1)
+    def y(v): return padT+ph*(1-v/mx)
+    out=[f'<svg viewBox="0 0 {width} {h}" width="100%">']
+    for lab,vals,col in series:
+        pts=" ".join(f"{x(i):.1f},{y(v):.1f}" for i,v in enumerate(vals))
+        out.append(f'<polyline points="{pts}" fill="none" stroke="{col}" stroke-width="2.2"/>')
+        out.append(f'<text x="{x(n-1)+3:.1f}" y="{y(vals[-1]):.1f}" fill="{col}" font-size="9.5">{html.escape(lab.split()[0])}</text>')
+    for i in range(n):
+        if i%2==0 or i==n-1:
+            out.append(f'<text x="{x(i):.1f}" y="{h-8}" text-anchor="middle" fill="#9aa3b2" font-size="10">{years[i][2:]}</text>')
+    out.append(f'<text x="4" y="{padT+8}" fill="#6b7280" font-size="10">{won(mx)}</text>')
+    out.append('</svg>')
+    return "\n".join(out)
+
 def main():
     pq = sys.argv[1] if len(sys.argv)>1 else "data/processed/choline_sick.parquet"
     out = sys.argv[2] if len(sys.argv)>2 else "dashboard/case_study.html"
@@ -82,6 +119,22 @@ def main():
     # 연도별 추이 = 전체 연도
     yr = df.groupby("y").claim_amount.sum().sort_index()
     yearly = [(y, int(v)) for y,v in yr.items()]
+
+    # 연도별 치매핵심 vs 비치매
+    df["is_core"]=df.sick_cd.str.startswith(CORE_PRE)
+    yc = df.groupby(["y","is_core"]).claim_amount.sum().unstack(fill_value=0).sort_index()
+    yc_core=[int(yc.loc[y].get(True,0)) for y in years]
+    yc_non=[int(yc.loc[y].get(False,0)) for y in years]
+    noncore_share=[nc/(c+nc)*100 for c,nc in zip(yc_core,yc_non)]
+
+    # 주요 상병(최신연도 상위 6) 연도별 추이
+    PAL=["#ff6b6b","#4fd18b","#5b9dff","#ffb454","#c084fc","#22d3ee"]
+    top6=df[df.y==latest].groupby(["sick_cd","sick_name"]).claim_amount.sum().sort_values(ascending=False).head(6)
+    tl_series=[]
+    for j,((cd,nm),_) in enumerate(top6.items()):
+        vals=[int(df[(df.y==y)&(df.sick_cd==cd)].claim_amount.sum()) for y in years]
+        icd=cd[1:] if cd and cd[0]=="A" else cd
+        tl_series.append((f"{icd} {nm[:9]}", vals, PAL[j%len(PAL)]))
 
     # 스냅샷 지표(도넛·카테고리·상위상병·월별·KPI)는 최신연도 기준
     dfl = df[df.y==latest]
@@ -115,11 +168,23 @@ def main():
     ts_section = ""
     if multiyear:
         yoy2020 = f"(전년比 +{(y2020/y2019-1)*100:.0f}%)" if y2020 and y2019 else ""
+        tl_legend="".join(f'<span class="chip2"><span class="sw" style="background:{col}"></span>{html.escape(lab)}</span>' for lab,_,col in tl_series)
         ts_section = f'''<h2><span class="n">3</span>연도별 청구액 추이 <span class="ok">✓ {years[0]}–{years[-1]}</span></h2>
         <div class="card">{line_chart([(y[2:],v) for y,v in yearly])}
         <p><b>{years[0]} {won(yearly[0][1])} → {latest} {won(yearly[-1][1])}, {growth:.1f}배.</b>
         2020년 8월 정부가 "치매 외 효능 근거 미흡"으로 본인부담을 30→80%로 올렸지만, 그해 청구는 오히려 {won(y2020) if y2020 else ''} {yoy2020}로 늘었고 이후로도 꺾이지 않았다.</p>
-        <p class="muted">재평가가 청구 규모를 줄였다는 근거는 이 곡선에서 보이지 않는다 — 정책효과에 대한 질문의 출발점.</p></div>'''
+        <p class="muted">재평가가 청구 규모를 줄였다는 근거는 이 곡선에서 보이지 않는다 — 정책효과에 대한 질문의 출발점.</p></div>
+
+        <h2><span class="n">4</span>치매 vs 비치매, 10년 내내 벌어진 격차</h2>
+        <div class="card">{stacked_bars(years, yc_core, yc_non)}
+        <p><span class="sw" style="background:#ff6b6b"></span><b>비치매</b> {won(yc_non[0])}→{won(yc_non[-1])} &nbsp;·&nbsp;
+        <span class="sw" style="background:#4fd18b"></span><b>치매 핵심</b> {won(yc_core[0])}→{won(yc_core[-1])}</p>
+        <p class="muted">비치매 비중은 {noncore_share[0]:.0f}%(2015)→{noncore_share[-1]:.0f}%({latest})로 10년 내내 <b>약 90%에 고착</b>. 치매약이지만 청구의 대부분은 줄곧 치매 밖에 있었다.</p></div>
+
+        <h2><span class="n">5</span>상병별 청구액 추이 — 고혈압이 알츠하이머를 앞질렀다</h2>
+        <div class="card">{multiline(years, tl_series)}
+        <div style="margin-top:8px">{tl_legend}</div>
+        <p class="muted">2024 상위 6개 상병의 연도별 청구액. <span class="badc">본태성 고혈압(I10, 빨강)</span>이 가장 가파르게 올라 실제 적응증인 <span class="good">알츠하이머(F00, 초록)</span>를 2019년경 추월했다.</p></div>'''
     else:
         ts_section = f'''<h2><span class="n">3</span>연도별 청구액 추이 <span class="pending">⏳ {latest}만 수집됨 — 2015~2023 추가 예정</span></h2>
         <div class="card pending-card">
@@ -152,6 +217,7 @@ h2 .n{{display:inline-flex;width:26px;height:26px;border-radius:8px;background:v
 .donut-wrap{{display:flex;gap:24px;align-items:center;flex-wrap:wrap}}
 .legend{{font-size:13px;color:var(--muted)}} .legend b{{color:var(--ink)}}
 .sw{{display:inline-block;width:11px;height:11px;border-radius:3px;margin-right:6px;vertical-align:middle}}
+.chip2{{display:inline-block;background:var(--chip);border:1px solid var(--line);border-radius:999px;padding:3px 10px;font-size:12px;color:#c7cdd8;margin:3px 5px 0 0}}
 .muted{{color:var(--muted);font-size:13px}} .good{{color:var(--good)}} .badc{{color:var(--bad)}}
 ul{{margin:8px 0;padding-left:20px}} li{{margin:5px 0}}
 .two{{display:grid;grid-template-columns:1fr 1fr;gap:14px}}
@@ -188,15 +254,15 @@ code{{background:#0a0c10;border:1px solid var(--line);border-radius:5px;padding:
 
 {ts_section}
 
-<h2><span class="n">4</span>{latest} 금액 상위 10개 상병</h2>
+<h2><span class="n">6</span>{latest} 금액 상위 10개 상병</h2>
 <div class="card">{bar_chart(top_rows, top_max)}
 <p class="muted">초록 = 치매 핵심코드. 1위는 알츠하이머가 아니라 <span class="badc">고혈압(I10)</span>.</p></div>
 
-<h2><span class="n">5</span>{latest} 월별 청구액</h2>
+<h2><span class="n">7</span>{latest} 월별 청구액</h2>
 <div class="card">{line_chart(monthly)}
 <p class="muted">연중 월 2,900~3,200억 수준으로 고르게 유지 — 특정 시기 급증이 아닌 상시 처방 구조.</p></div>
 
-<h2><span class="n">6</span>강의 포인트 — 말할 수 있음 vs 위험함</h2>
+<h2><span class="n">8</span>강의 포인트 — 말할 수 있음 vs 위험함</h2>
 <div class="two">
 <div class="card"><h3 class="good" style="margin-top:0">말할 수 있음</h3><ul>
 <li>청구 상병 기준 비치매 코드의 금액 비중이 크다.</li>
