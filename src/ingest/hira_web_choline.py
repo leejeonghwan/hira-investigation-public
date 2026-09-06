@@ -17,6 +17,7 @@ import argparse
 import json
 import logging
 import re
+import time
 from io import StringIO
 from pathlib import Path
 
@@ -65,7 +66,11 @@ def normalize_sick_code(value: str) -> str:
 
 
 def parse_table(html: str) -> pd.DataFrame:
-    tables = pd.read_html(StringIO(html), encoding="utf-8")
+    try:
+        tables = pd.read_html(StringIO(html), flavor="lxml")
+    except Exception as exc:
+        logger.warning("표 파싱 실패(빈/깨진 페이지 건너뜀): %s", exc)
+        return pd.DataFrame()
     target = None
     for table in tables:
         cols = {str(c).strip() for c in table.columns}
@@ -174,7 +179,23 @@ def collect(years: list[int], codes: list[str], gubun: str) -> pd.DataFrame:
     raw_dir.mkdir(parents=True, exist_ok=True)
 
     session = requests.Session()
-    session.get(TAB3_URL, timeout=60, verify=False)
+    # 심평원 서버는 기본 python-requests UA 를 막는다. 브라우저형 헤더 필수.
+    session.headers.update({
+        "User-Agent": ("Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) "
+                       "AppleWebKit/537.36 (KHTML, like Gecko) "
+                       "Chrome/126.0 Safari/537.36"),
+        "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+        "Accept-Language": "ko-KR,ko;q=0.9,en;q=0.8",
+        "Referer": BASE + "/op/opc/olapGnlInfoTab3.do",
+    })
+    # 워밍업 GET — 실패해도 재시도.
+    for attempt in range(3):
+        try:
+            session.get(TAB3_URL, timeout=60, verify=False)
+            break
+        except Exception as exc:
+            logger.warning("warmup GET 실패(%d/3): %s", attempt + 1, exc)
+            time.sleep(3)
 
     frames = []
     names = {}

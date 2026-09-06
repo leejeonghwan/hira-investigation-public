@@ -12,3 +12,6 @@ geopandas>=0.14
 pysal>=24.1
 tqdm>=4.66
 xmltodict>=0.13
+html5lib
+lxml
+beautifulsoup4
