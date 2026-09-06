@@ -1,0 +1,874 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>AI + 저널리즘 실습: 심평원 데이터로 의약품 재정누수 신호 찾기</title>
+  <style>
+    :root {
+      --ink: #1f2933;
+      --muted: #667085;
+      --line: #d8dee8;
+      --paper: #fbfcfe;
+      --panel: #ffffff;
+      --blue: #246bfe;
+      --green: #0f8f6f;
+      --red: #b42318;
+      --amber: #b76e00;
+      --violet: #6d3fd6;
+      --shadow: 0 16px 40px rgba(31, 41, 51, 0.08);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      margin: 0;
+      color: var(--ink);
+      background: var(--paper);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      line-height: 1.65;
+    }
+
+    a {
+      color: var(--blue);
+      text-decoration: none;
+    }
+
+    a:hover {
+      text-decoration: underline;
+    }
+
+    .topbar {
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+      padding: 14px clamp(18px, 4vw, 54px);
+      border-bottom: 1px solid rgba(216, 222, 232, 0.8);
+      background: rgba(251, 252, 254, 0.92);
+      backdrop-filter: blur(16px);
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      min-width: 0;
+      font-weight: 800;
+      letter-spacing: 0;
+    }
+
+    .brand-mark {
+      display: grid;
+      place-items: center;
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      color: white;
+      background: linear-gradient(135deg, var(--blue), var(--green));
+      font-size: 14px;
+    }
+
+    .toplinks {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      font-size: 14px;
+      color: var(--muted);
+      white-space: nowrap;
+    }
+
+    .wrap {
+      max-width: 1180px;
+      margin: 0 auto;
+      padding: 0 clamp(18px, 4vw, 54px) 64px;
+    }
+
+    .hero {
+      display: grid;
+      grid-template-columns: minmax(0, 1.08fr) minmax(320px, 0.92fr);
+      gap: clamp(28px, 4vw, 54px);
+      align-items: center;
+      min-height: 620px;
+      padding: 62px 0 48px;
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 18px;
+      color: var(--green);
+      font-size: 14px;
+      font-weight: 800;
+      letter-spacing: 0;
+    }
+
+    h1 {
+      max-width: 900px;
+      margin: 0;
+      font-size: clamp(38px, 5.2vw, 76px);
+      line-height: 1.08;
+      letter-spacing: 0;
+    }
+
+    .lead {
+      max-width: 760px;
+      margin: 24px 0 0;
+      color: #46515f;
+      font-size: clamp(18px, 2vw, 23px);
+      line-height: 1.6;
+    }
+
+    .hero-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-top: 28px;
+    }
+
+    .button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 44px;
+      padding: 10px 16px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      color: var(--ink);
+      background: white;
+      font-weight: 800;
+    }
+
+    .button.primary {
+      border-color: var(--blue);
+      color: white;
+      background: var(--blue);
+    }
+
+    .visual {
+      position: relative;
+      min-height: 430px;
+      padding: 26px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background:
+        linear-gradient(180deg, rgba(255,255,255,0.94), rgba(255,255,255,0.78)),
+        radial-gradient(circle at 22% 18%, rgba(36, 107, 254, 0.12), transparent 34%),
+        radial-gradient(circle at 78% 74%, rgba(15, 143, 111, 0.13), transparent 30%);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+
+    .mini-title {
+      margin: 0 0 18px;
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+
+    .signal-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    .signal {
+      min-height: 108px;
+      padding: 16px;
+      border: 1px solid rgba(216, 222, 232, 0.8);
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.86);
+    }
+
+    .signal strong {
+      display: block;
+      font-size: clamp(24px, 3.6vw, 38px);
+      line-height: 1.05;
+      letter-spacing: 0;
+    }
+
+    .signal span {
+      display: block;
+      margin-top: 8px;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.45;
+    }
+
+    .bar-stack {
+      margin-top: 22px;
+      padding: 18px;
+      border: 1px solid rgba(216, 222, 232, 0.8);
+      border-radius: 8px;
+      background: rgba(255,255,255,0.88);
+    }
+
+    .bar-row {
+      display: grid;
+      grid-template-columns: 58px minmax(0, 1fr) 62px;
+      gap: 10px;
+      align-items: center;
+      margin-top: 12px;
+      font-size: 13px;
+      color: var(--muted);
+    }
+
+    .track {
+      height: 13px;
+      border-radius: 999px;
+      background: #edf1f7;
+      overflow: hidden;
+    }
+
+    .fill {
+      height: 100%;
+      border-radius: 999px;
+      background: linear-gradient(90deg, var(--blue), var(--green));
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: 250px minmax(0, 1fr);
+      gap: 42px;
+      align-items: start;
+    }
+
+    .toc {
+      position: sticky;
+      top: 78px;
+      padding: 18px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: white;
+    }
+
+    .toc h2 {
+      margin: 0 0 12px;
+      font-size: 15px;
+    }
+
+    .toc a {
+      display: block;
+      padding: 8px 0;
+      color: #46515f;
+      font-size: 14px;
+      border-top: 1px solid #eef2f7;
+    }
+
+    section {
+      scroll-margin-top: 92px;
+      padding: 42px 0;
+      border-top: 1px solid var(--line);
+    }
+
+    section:first-child {
+      border-top: 0;
+      padding-top: 0;
+    }
+
+    h2 {
+      margin: 0 0 14px;
+      font-size: clamp(28px, 3vw, 42px);
+      line-height: 1.16;
+      letter-spacing: 0;
+    }
+
+    h3 {
+      margin: 30px 0 10px;
+      font-size: 22px;
+      line-height: 1.25;
+      letter-spacing: 0;
+    }
+
+    p {
+      margin: 12px 0;
+    }
+
+    .section-lead {
+      max-width: 780px;
+      color: #46515f;
+      font-size: 18px;
+    }
+
+    .cards {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 16px;
+      margin-top: 22px;
+    }
+
+    .card {
+      min-height: 168px;
+      padding: 18px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: white;
+    }
+
+    .card h3 {
+      margin: 0 0 8px;
+      font-size: 18px;
+    }
+
+    .card p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 15px;
+    }
+
+    .tag {
+      display: inline-flex;
+      align-items: center;
+      min-height: 28px;
+      margin-bottom: 12px;
+      padding: 4px 10px;
+      border-radius: 999px;
+      color: #344054;
+      background: #eef2f7;
+      font-size: 13px;
+      font-weight: 800;
+    }
+
+    .tag.blue { color: #174ea6; background: #e8f0ff; }
+    .tag.green { color: #067647; background: #e7f7ef; }
+    .tag.red { color: #9a3412; background: #fff0e6; }
+    .tag.violet { color: #5925dc; background: #f1edff; }
+
+    .flow {
+      display: grid;
+      gap: 12px;
+      margin-top: 22px;
+    }
+
+    .step {
+      display: grid;
+      grid-template-columns: 46px minmax(0, 1fr);
+      gap: 14px;
+      align-items: start;
+      padding: 18px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: white;
+    }
+
+    .num {
+      display: grid;
+      place-items: center;
+      width: 38px;
+      height: 38px;
+      border-radius: 8px;
+      color: white;
+      background: var(--ink);
+      font-weight: 900;
+    }
+
+    .step h3 {
+      margin: 0 0 6px;
+      font-size: 19px;
+    }
+
+    .step p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 15px;
+    }
+
+    .callout {
+      margin: 22px 0;
+      padding: 18px 20px;
+      border-left: 5px solid var(--amber);
+      border-radius: 8px;
+      background: #fff8eb;
+    }
+
+    .callout strong {
+      display: block;
+      margin-bottom: 6px;
+    }
+
+    .do-dont {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin-top: 22px;
+    }
+
+    .panel {
+      padding: 18px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: white;
+    }
+
+    .panel.good {
+      border-color: rgba(15, 143, 111, 0.35);
+    }
+
+    .panel.risky {
+      border-color: rgba(180, 35, 24, 0.28);
+    }
+
+    ul, ol {
+      padding-left: 22px;
+    }
+
+    li {
+      margin: 8px 0;
+    }
+
+    code {
+      padding: 2px 6px;
+      border-radius: 5px;
+      background: #eef2f7;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      font-size: 0.92em;
+    }
+
+    pre {
+      overflow: auto;
+      margin: 16px 0;
+      padding: 18px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      color: #dbe7ff;
+      background: #111827;
+      font-size: 14px;
+      line-height: 1.55;
+    }
+
+    pre code {
+      padding: 0;
+      background: transparent;
+      color: inherit;
+    }
+
+    table {
+      width: 100%;
+      margin-top: 18px;
+      border-collapse: collapse;
+      border: 1px solid var(--line);
+      background: white;
+      font-size: 15px;
+    }
+
+    th, td {
+      padding: 12px 14px;
+      border-bottom: 1px solid var(--line);
+      text-align: left;
+      vertical-align: top;
+    }
+
+    th {
+      background: #f4f7fb;
+      font-size: 13px;
+      color: #475467;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+
+    .source-list {
+      font-size: 14px;
+      color: var(--muted);
+    }
+
+    .footer {
+      margin-top: 54px;
+      padding-top: 28px;
+      border-top: 1px solid var(--line);
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    @media (max-width: 940px) {
+      .hero, .grid, .do-dont {
+        grid-template-columns: 1fr;
+      }
+
+      .hero {
+        min-height: auto;
+        padding-top: 44px;
+      }
+
+      .toc {
+        position: static;
+      }
+
+      .cards {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 680px) {
+      .topbar {
+        align-items: flex-start;
+        flex-direction: column;
+        gap: 8px;
+      }
+
+      .toplinks {
+        flex-wrap: wrap;
+        white-space: normal;
+      }
+
+      .signal-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .bar-row {
+        grid-template-columns: 48px minmax(0, 1fr) 52px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <span class="brand-mark">AI</span>
+      <span>AI + 데이터 저널리즘 실습</span>
+    </div>
+    <nav class="toplinks" aria-label="상단 링크">
+      <a href="index.html">대시보드</a>
+      <a href="#module">수업 구성</a>
+      <a href="#prompts">프롬프트</a>
+      <a href="#ethics">검증 원칙</a>
+    </nav>
+  </header>
+
+  <main class="wrap">
+    <section class="hero" id="top">
+      <div>
+        <div class="eyebrow">HIRA DATA PROJECT · CASE STUDY</div>
+        <h1>심평원 공개자료로 의약품 재정누수 신호를 찾는 법</h1>
+        <p class="lead">
+          콜린알포세레이트 사례를 따라가며, AI를 데이터 수집 조력자·분석 파트너·편집 검증자로 쓰는 실습형 강의안입니다.
+          목표는 “AI가 써준 기사”가 아니라 “AI와 함께 검증 가능한 질문을 좁혀가는 취재 과정”을 익히는 것입니다.
+        </p>
+        <div class="hero-actions">
+          <a class="button primary" href="#module">수업 흐름 보기</a>
+          <a class="button" href="index.html">분석 대시보드 열기</a>
+        </div>
+      </div>
+
+      <aside class="visual" aria-label="프로젝트 핵심 지표 요약">
+        <p class="mini-title">What students reproduce</p>
+        <div class="signal-grid">
+          <div class="signal">
+            <strong>4,174억</strong>
+            <span>2024년 공개 상병별 통계 기준 콜린알포세레이트 상위 100상병 청구액</span>
+          </div>
+          <div class="signal">
+            <strong>86.9%</strong>
+            <span>치매·알츠하이머 핵심 코드 밖에 잡힌 청구액 비중</span>
+          </div>
+          <div class="signal">
+            <strong>I10</strong>
+            <span>2024년 금액 1위 상병: 본태성 고혈압</span>
+          </div>
+          <div class="signal">
+            <strong>94개</strong>
+            <span>2026년 6월 기준 급여목록상 콜린알포세레이트 품목 수</span>
+          </div>
+        </div>
+        <div class="bar-stack">
+          <p class="mini-title">Story signal, not proof of fraud</p>
+          <div class="bar-row">
+            <span>2021</span>
+            <div class="track"><div class="fill" style="width:74%"></div></div>
+            <span>3,099억</span>
+          </div>
+          <div class="bar-row">
+            <span>2024</span>
+            <div class="track"><div class="fill" style="width:100%"></div></div>
+            <span>4,174억</span>
+          </div>
+        </div>
+      </aside>
+    </section>
+
+    <div class="grid">
+      <aside class="toc" aria-label="목차">
+        <h2>목차</h2>
+        <a href="#why">1. 왜 이 사례인가</a>
+        <a href="#module">2. 4시간 수업 구성</a>
+        <a href="#workflow">3. 제작 워크플로</a>
+        <a href="#prompts">4. 프롬프트 예시</a>
+        <a href="#findings">5. 기사화 가능한 팩트</a>
+        <a href="#ethics">6. 검증과 표현의 선</a>
+        <a href="#assignment">7. 실습 과제</a>
+      </aside>
+
+      <article>
+        <section id="why">
+          <h2>1. 왜 이 사례인가</h2>
+          <p class="section-lead">
+            이 프로젝트는 AI 데이터 저널리즘 강의에 필요한 요소를 거의 모두 갖고 있습니다.
+            공개데이터, 정책 문서, 제약회사 이해관계, 의료적 해석의 한계, 그리고 “좋은 의심”과 “위험한 단정” 사이의 경계가 함께 들어 있습니다.
+          </p>
+          <div class="cards">
+            <div class="card">
+              <span class="tag blue">데이터</span>
+              <h3>공개자료만으로 시작한다</h3>
+              <p>심평원 공개 통계와 급여목록을 모아 성분·상병·품목·회사 단위로 재구성합니다.</p>
+            </div>
+            <div class="card">
+              <span class="tag green">저널리즘</span>
+              <h3>질문을 좁혀간다</h3>
+              <p>“누가 나쁘다”가 아니라 “정책 판단과 실제 청구 구조가 왜 어긋나는가”로 출발합니다.</p>
+            </div>
+            <div class="card">
+              <span class="tag violet">AI</span>
+              <h3>검증 가능한 산출물을 만든다</h3>
+              <p>AI에게 코드를 맡기되, 결과표·원자료·공식 문서·반론 가능성을 기자가 끝까지 붙잡습니다.</p>
+            </div>
+          </div>
+        </section>
+
+        <section id="module">
+          <h2>2. 4시간 수업 구성</h2>
+          <table>
+            <thead>
+              <tr>
+                <th>시간</th>
+                <th>활동</th>
+                <th>산출물</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>0:00-0:30</td>
+                <td>사례 브리핑: 2020년 급여 재평가, 콜린알포세레이트 쟁점, 보도 가설 세우기</td>
+                <td>취재 질문 3개</td>
+              </tr>
+              <tr>
+                <td>0:30-1:30</td>
+                <td>AI와 함께 데이터 사전 만들기: 성분코드, 품목코드, 제조사명, 상병코드 정의</td>
+                <td>품목·제조사 마스터</td>
+              </tr>
+              <tr>
+                <td>1:30-2:30</td>
+                <td>상병별 청구액 분석: 핵심 치매 코드와 비핵심 코드 분리, 연도별 비교</td>
+                <td>핵심 지표표와 상위 상병표</td>
+              </tr>
+              <tr>
+                <td>2:30-3:20</td>
+                <td>대시보드 만들기: 독자가 이해할 수 있는 지표, 표, 주석 설계</td>
+                <td>정적 웹 대시보드</td>
+              </tr>
+              <tr>
+                <td>3:20-4:00</td>
+                <td>기사화 회의: 말할 수 있는 것, 아직 말하면 안 되는 것, 추가 정보공개청구 설계</td>
+                <td>1보 문장과 추가 취재 목록</td>
+              </tr>
+            </tbody>
+          </table>
+        </section>
+
+        <section id="workflow">
+          <h2>3. 제작 워크플로</h2>
+          <p class="section-lead">
+            핵심은 AI에게 “정답”을 묻는 것이 아니라, 취재 과정을 작은 검증 단위로 쪼개 맡기는 것입니다.
+          </p>
+          <div class="flow">
+            <div class="step">
+              <div class="num">1</div>
+              <div>
+                <h3>문제 정의</h3>
+                <p>“건보 재정이 새는 약을 찾자”는 넓은 질문을 “2020년 재평가 이후 콜린알포세레이트의 비치매성 상병 청구가 얼마나 남았나”로 좁힙니다.</p>
+              </div>
+            </div>
+            <div class="step">
+              <div class="num">2</div>
+              <div>
+                <h3>데이터 지도 만들기</h3>
+                <p>심평원 공개 통계, 약제급여목록, 식약처/심평원 코드 체계를 연결해 어떤 표가 어떤 질문에 답하는지 정리합니다.</p>
+              </div>
+            </div>
+            <div class="step">
+              <div class="num">3</div>
+              <div>
+                <h3>수집과 파싱</h3>
+                <p>AI에게 반복 수집 스크립트와 파서를 만들게 하되, 차단·빈 표·연도별 누락을 별도 상태값으로 남깁니다.</p>
+              </div>
+            </div>
+            <div class="step">
+              <div class="num">4</div>
+              <div>
+                <h3>분석 기준 확정</h3>
+                <p>핵심 치매 코드는 <code>F00/F01/F02/F03/G30</code>으로, 그 밖은 비핵심 코드로 분리합니다. 이 기준은 기사 안에서 반드시 공개합니다.</p>
+              </div>
+            </div>
+            <div class="step">
+              <div class="num">5</div>
+              <div>
+                <h3>대시보드와 기사 문장 동시 제작</h3>
+                <p>그래프를 먼저 만들고 문장을 맞추는 것이 아니라, “독자에게 필요한 반론 주석”까지 포함해 화면과 기사 문장을 함께 다듬습니다.</p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section id="prompts">
+          <h2>4. 프롬프트 예시</h2>
+          <p class="section-lead">
+            좋은 프롬프트는 긴 명령문보다 좋은 편집 메모에 가깝습니다. 목적, 데이터의 한계, 출력 형식, 금지할 단정을 같이 줍니다.
+          </p>
+          <h3>분석 시작</h3>
+          <pre><code>심평원 공개자료로 콜린알포세레이트 청구 현황을 분석하려고 합니다.
+먼저 성분코드와 품목코드를 분리하고, 2024년 상병별 청구액에서
+치매 핵심 코드(F00/F01/F02/F03/G30)와 그 밖의 코드를 나눠 요약해 주세요.
+단, 청구 상병이 곧 처방 적응증이라는 단정은 하지 마세요.</code></pre>
+
+          <h3>검증 요청</h3>
+          <pre><code>아래 분석 결과에서 기사화 가능한 사실과 아직 단정하면 안 되는 해석을 분리해 주세요.
+각 문장마다 필요한 추가 근거와 반론 가능성을 붙여 주세요.</code></pre>
+
+          <h3>대시보드 요청</h3>
+          <pre><code>이 결과를 기자와 데스크가 함께 보는 정적 웹 대시보드로 만들어 주세요.
+첫 화면에는 핵심 팩트 3개, 데이터 한계, 추가 취재 필요 항목이 바로 보여야 합니다.
+차트보다 해석 주석을 우선 배치해 주세요.</code></pre>
+        </section>
+
+        <section id="findings">
+          <h2>5. 기사화 가능한 핵심 팩트</h2>
+          <p class="section-lead">
+            현재 공개자료만으로 가장 단단한 1보는 특정 의사나 회사를 바로 겨냥하는 보도가 아니라,
+            정책 판단과 청구 현실 사이의 괴리를 보여주는 보도입니다.
+          </p>
+          <div class="callout">
+            <strong>1보 문장 후보</strong>
+            2020년 정부가 콜린알포세레이트의 치매 외 효능 근거가 미흡하다고 판단했지만,
+            2024년 심평원 공개 상병별 통계에서 이 성분의 상위 100상병 청구액 4,174억원 중 86.9%는 치매·알츠하이머 핵심 코드 밖에 잡혔다.
+            금액 1위 상병은 알츠하이머 치매가 아니라 본태성 고혈압이었다.
+          </div>
+          <table>
+            <thead>
+              <tr>
+                <th>팩트</th>
+                <th>의미</th>
+                <th>주의 문장</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>비핵심 코드 비중 86.9%</td>
+                <td>정책이 겨냥한 “치매 외 사용” 의심 영역이 여전히 크다는 신호</td>
+                <td>공개자료는 주상병·부상병과 실제 처방 목적을 구분하지 못한다.</td>
+              </tr>
+              <tr>
+                <td>I10 고혈압이 1위</td>
+                <td>노인 만성질환 청구 구조 안에 콜린알포세레이트가 넓게 얹혀 있을 가능성</td>
+                <td>고혈압 치료제로 처방됐다는 뜻은 아니다.</td>
+              </tr>
+              <tr>
+                <td>2021년 대비 2024년 총액 증가</td>
+                <td>재평가 이후에도 청구 규모가 줄지 않았다는 정책효과 질문</td>
+                <td>연도별 성분코드 수집 상태가 달라 비교 가능한 코드만 따로 봐야 한다.</td>
+              </tr>
+              <tr>
+                <td>품목 94개·회사 52곳</td>
+                <td>한두 회사만의 문제가 아니라 제네릭 시장 전체의 이해관계</td>
+                <td>품목 수는 시장점유율이나 청구액 점유율이 아니다.</td>
+              </tr>
+            </tbody>
+          </table>
+        </section>
+
+        <section id="ethics">
+          <h2>6. 검증과 표현의 선</h2>
+          <div class="do-dont">
+            <div class="panel good">
+              <span class="tag green">말할 수 있음</span>
+              <ul>
+                <li>“청구 상병 기준으로 비치매성 코드의 금액 비중이 크다.”</li>
+                <li>“정부의 급여 재평가 취지와 실제 청구 구조 사이에 괴리가 보인다.”</li>
+                <li>“제품·회사·기관별 자료가 확보되면 책임 소재를 더 좁힐 수 있다.”</li>
+              </ul>
+            </div>
+            <div class="panel risky">
+              <span class="tag red">아직 위험함</span>
+              <ul>
+                <li>“의사가 효과 없는 약을 알고도 처방했다.”</li>
+                <li>“고혈압 치료 목적으로 콜린알포세레이트를 썼다.”</li>
+                <li>“특정 회사가 현재 재정누수를 만들었다.”</li>
+              </ul>
+            </div>
+          </div>
+          <div class="callout">
+            <strong>강의 포인트</strong>
+            AI는 과감한 가설을 잘 만듭니다. 기자의 일은 그 가설을 더 자극적으로 만드는 것이 아니라,
+            어떤 문장은 증거가 충분하고 어떤 문장은 아직 취재가 더 필요한지 구분하는 것입니다.
+          </div>
+        </section>
+
+        <section id="assignment">
+          <h2>7. 실습 과제</h2>
+          <ol>
+            <li>대시보드에서 2024년 상위 상병 10개를 보고, 기사 첫 문장 후보를 3개 작성합니다.</li>
+            <li>각 문장에 대해 “자료가 직접 말하는 것”과 “우리가 추정하는 것”을 분리합니다.</li>
+            <li>심평원 정보공개청구 문안을 작성합니다. 최소 항목은 연도, 성분코드, 품목코드, 요양기관 종별, 시도·시군구, 주상병·부상병 여부, 청구액입니다.</li>
+            <li>제약회사·의료계·복지부·심평원에 보낼 반론 질문 5개를 만듭니다.</li>
+            <li>마지막으로 AI에게 자신의 기사 문장을 비판하게 하고, 과장된 표현을 줄입니다.</li>
+          </ol>
+
+          <h3>제출물</h3>
+          <table>
+            <thead>
+              <tr>
+                <th>제출물</th>
+                <th>평가 기준</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>팩트시트 1장</td>
+                <td>출처, 수치, 기준 코드, 한계가 함께 적혀 있는가</td>
+              </tr>
+              <tr>
+                <td>대시보드 링크</td>
+                <td>핵심 지표와 주석이 첫 화면에서 이해되는가</td>
+              </tr>
+              <tr>
+                <td>기사 리드 3개</td>
+                <td>흥미롭지만 단정하지 않는가</td>
+              </tr>
+              <tr>
+                <td>추가 취재 계획</td>
+                <td>현재 데이터로 확인할 수 없는 부분을 정확히 겨냥하는가</td>
+              </tr>
+            </tbody>
+          </table>
+        </section>
+
+        <section id="sources">
+          <h2>자료와 출처</h2>
+          <ul class="source-list">
+            <li><a href="https://www.mohw.go.kr/board.es?act=view&bid=0027&list_no=357205&mid=a10503000000">보건복지부 2020년 건강보험정책심의위원회 보도자료</a></li>
+            <li><a href="https://opendata.hira.or.kr/op/opc/selectOpnsApi.do?sno=1404">심평원 약제급여목록 API 안내</a></li>
+            <li><a href="https://opendata.hira.or.kr/op/opc/olapGnlInfoTab3.do">심평원 성분의 상병별 사용실적 공개 화면</a></li>
+            <li><a href="index.html">이 프로젝트의 콜린알포세레이트 분석 대시보드</a></li>
+          </ul>
+        </section>
+
+        <footer class="footer">
+          <p>
+            이 교재는 공개자료 기반 실습용입니다. 의료적 효능, 개별 처방의 적정성, 특정 회사의 법적 책임은 공개 통계만으로 단정하지 않습니다.
+            강의에서는 항상 “데이터가 말하는 것”과 “추가 취재가 필요한 것”을 분리합니다.
+          </p>
+        </footer>
+      </article>
+    </div>
+  </main>
+</body>
+</html>

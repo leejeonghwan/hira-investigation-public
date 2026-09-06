@@ -1,0 +1,16 @@
+.DS_Store
+env/
+__pycache__/
+*.pyc
+data/raw/*
+data/processed/*
+!data/raw/.gitkeep
+!data/processed/.gitkeep
+
+node_modules/
+inspect_*.py
+inspect_*.mjs
+workbook_*.json
+workbook_*.txt
+!data/processed/choline_sick.parquet
+!data/processed/suspect_drugs.json

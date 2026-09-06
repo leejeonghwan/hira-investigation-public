@@ -6,7 +6,7 @@
 
 ```bash
 env/bin/python -m src.ingest.hira_web_choline --years 2024 --codes 138101ACH 138101ACS 138101ATB 138103ASY 138104ASY
-env/bin/python -m dashboard_suspect.build_data
+env/bin/python -m dashboard.build_data
 ```
 
 ## 현재 데이터

@@ -13,6 +13,7 @@ from __future__ import annotations
 import hashlib
 import json
 import logging
+import re
 import time
 from pathlib import Path
 from typing import Any, Dict, Iterator, Optional
@@ -50,6 +51,10 @@ class DailyLimitReached(HiraAPIError):
 
 class AllKeysExhausted(HiraAPIError):
     """풀의 모든 키가 오늘 한도 소진."""
+
+
+def _redact_service_keys(text: str) -> str:
+    return re.sub(r"(ServiceKey=)[^&\s)]+", r"\1…redacted", text)
 
 
 class _KeyPool:
@@ -187,7 +192,10 @@ class HiraClient:
 
         url = f"{self.base_url}/{endpoint.operation}"
         logger.info("GET %s page=%s key=…%s", endpoint.name, page, key[-6:])
-        resp = self._session.get(url, params=full_params, timeout=self.timeout)
+        try:
+            resp = self._session.get(url, params=full_params, timeout=self.timeout)
+        except requests.RequestException as exc:
+            raise requests.RequestException(_redact_service_keys(str(exc))) from None
         if resp.status_code in (429, 500, 502, 503, 504):
             raise HiraAPIError(f"transient {resp.status_code} from {endpoint.name}")
         resp.raise_for_status()

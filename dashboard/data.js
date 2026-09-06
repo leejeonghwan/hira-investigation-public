@@ -1,5 +1,5 @@
 window.SUSPECT_DATA = {
-  "generatedAt": "2026-07-15 12:31",
+  "generatedAt": "2026-07-15 12:29",
   "runStatus": "진행 중 (7%)",
   "drugs": [
     {

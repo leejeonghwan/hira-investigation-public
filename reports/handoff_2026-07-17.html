@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>콜린알포세레이트 취재 · 중간 정리 (GPT→Claude 인수인계)</title>
+<style>
+  :root{
+    --bg:#0f1115; --panel:#171a21; --panel2:#1e222b; --line:#2a2f3a;
+    --ink:#e8eaed; --muted:#9aa3b2; --accent:#5b9dff; --warn:#ffb454;
+    --bad:#ff6b6b; --good:#4fd18b; --chip:#232936;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Pretendard",system-ui,sans-serif;
+    line-height:1.65;font-size:15px}
+  .wrap{max-width:920px;margin:0 auto;padding:32px 20px 80px}
+  header{border-bottom:1px solid var(--line);padding-bottom:20px;margin-bottom:8px}
+  .eyebrow{color:var(--accent);font-size:12px;font-weight:700;letter-spacing:.14em;text-transform:uppercase}
+  h1{font-size:26px;margin:8px 0 6px;font-weight:800;letter-spacing:-.01em}
+  .sub{color:var(--muted);font-size:14px}
+  h2{font-size:19px;margin:38px 0 12px;font-weight:800;display:flex;align-items:center;gap:9px}
+  h2 .n{display:inline-flex;width:26px;height:26px;border-radius:8px;background:var(--chip);
+    color:var(--accent);font-size:13px;align-items:center;justify-content:center;font-weight:700}
+  h3{font-size:15px;margin:20px 0 8px;color:var(--ink);font-weight:700}
+  p{margin:8px 0}
+  .kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin:22px 0 6px}
+  .kpi{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:16px}
+  .kpi .v{font-size:24px;font-weight:800;letter-spacing:-.02em}
+  .kpi .l{color:var(--muted);font-size:12px;margin-top:4px;line-height:1.4}
+  .kpi.good .v{color:var(--good)} .kpi.warn .v{color:var(--warn)} .kpi.bad .v{color:var(--bad)}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:18px 20px;margin:12px 0}
+  .card.warn{border-color:#5a4a25;background:#1d1a12}
+  .card.bad{border-color:#5a2a2a;background:#1d1414}
+  table{width:100%;border-collapse:collapse;margin:12px 0;font-size:14px}
+  th,td{text-align:left;padding:9px 10px;border-bottom:1px solid var(--line);vertical-align:top}
+  th{color:var(--muted);font-weight:600;font-size:12px;text-transform:uppercase;letter-spacing:.04em}
+  td.num{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+  .bar{height:7px;border-radius:4px;background:var(--accent);display:inline-block;vertical-align:middle}
+  ul{margin:8px 0;padding-left:20px} li{margin:5px 0}
+  .chip{display:inline-block;background:var(--chip);border:1px solid var(--line);border-radius:999px;
+    padding:2px 10px;font-size:12px;color:var(--muted);margin:2px 3px 2px 0}
+  .tag{font-size:11px;font-weight:700;padding:2px 8px;border-radius:6px}
+  .tag.done{background:#123524;color:var(--good)} .tag.part{background:#3a2f12;color:var(--warn)}
+  .tag.none{background:#3a1616;color:var(--bad)}
+  .muted{color:var(--muted)} .accent{color:var(--accent)} .warnc{color:var(--warn)} .badc{color:var(--bad)}
+  code{background:#0a0c10;border:1px solid var(--line);border-radius:5px;padding:1px 6px;font-size:13px}
+  .checklist li{list-style:none;position:relative;padding-left:26px}
+  .checklist li::before{content:"☐";position:absolute;left:0;color:var(--muted);font-size:16px}
+  .foot{margin-top:44px;padding-top:18px;border-top:1px solid var(--line);color:var(--muted);font-size:12.5px}
+  @media(max-width:640px){.kpis{grid-template-columns:repeat(2,1fr)}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+  <div class="eyebrow">HIRA Investigation · 중간 정리</div>
+  <h1>콜린알포세레이트 재정누수 취재 — 인수인계 현황</h1>
+  <div class="sub">GPT에서 진행하던 작업을 Claude가 넘겨받아 정리 · 기준일 2026-07-17 · 원본 <code>~/Downloads/parm</code></div>
+</header>
+
+<div class="kpis">
+  <div class="kpi"><div class="v">3,619억</div><div class="l">2024년 콜린알포세레이트 청구액<br>(수집분·5개 성분코드)</div></div>
+  <div class="kpi bad"><div class="v">87.1%</div><div class="l">치매 핵심코드(F00–03·G30)<br><b>밖</b>에서 잡힌 청구액 비중 <span class="accent">✓ Claude 재검증</span></div></div>
+  <div class="kpi warn"><div class="v">I10</div><div class="l">2024 금액 1위 상병<br>본태성 고혈압 (571억)</div></div>
+  <div class="kpi warn"><div class="v">7%</div><div class="l">전체 수집 계획 대비<br>진행률 (53 / 720콜)</div></div>
+</div>
+<p class="muted" style="font-size:12.5px">※ 숫자는 "통계적 신호"이지 부정 증거가 아니다. 청구 상병 ≠ 처방 목적. 아래 5번 검증선 참조.</p>
+
+<h2><span class="n">1</span>지금까지 무엇을 했나 (GPT 단계)</h2>
+<div class="card">
+<p>넓은 질문 "건보 재정이 새는 약을 찾자"를 <b>"2020년 급여 재평가 이후에도 콜린알포세레이트의 비(非)치매성 청구가 얼마나 남았나"</b>로 좁혔다. 심평원 공개 웹통계(<span class="muted">성분의 상병별 사용실적</span>)에서 콜린알포 5개 성분코드의 2024년 상병별 청구 데이터를 수집하고, 정적 웹 대시보드와 4시간짜리 AI·저널리즘 강의안(<code>lesson.html</code>)까지 만들었다.</p>
+<p class="muted">파이프라인·크롤러·분석 코드(가설 H1~H5)는 갖춰졌으나, <b>실제로 돌려서 데이터가 나온 건 2024년 1년치뿐</b>이다. 공개 리포 <code>hira-investigation-public</code>에는 데이터를 뺀 방법론·툴킷만 올라가 있다.</p>
+</div>
+
+<h2><span class="n">2</span>확보한 데이터</h2>
+<table>
+<thead><tr><th>구분</th><th>내용</th><th>상태</th></tr></thead>
+<tbody>
+<tr><td>A트랙 · 성분×상병×월 (전국)</td><td>2024년 12개월, 283개 상병, 5,376행 → <code>choline_sick.parquet</code></td><td><span class="tag done">완료</span></td></tr>
+<tr><td>웹 크롤 원본 HTML</td><td>2024년 성분코드 5개 페이지 → <code>data/raw/hira_web_choline/</code></td><td><span class="tag done">완료</span></td></tr>
+<tr><td>정적 대시보드 + 강의안</td><td><code>dashboard/</code> (index·data.js·lesson.html)</td><td><span class="tag done">완료</span></td></tr>
+<tr><td>B트랙 · 성분×시군구×월</td><td>지역 편중(핫스팟) 분석용</td><td><span class="tag none">0 · 미착수</span></td></tr>
+<tr><td>C트랙 · 성분×시군구×기관종×월</td><td>핵심 가설 G패턴(의원 vs 병원)용</td><td><span class="tag none">0 · 미착수</span></td></tr>
+<tr><td>2015~2023 시계열</td><td>급증(surge) 추세 분석용</td><td><span class="tag none">미수집</span></td></tr>
+<tr><td>약가마스터·급여목록 조인</td><td>제조사·오리지널 식별(H2·H3)용</td><td><span class="tag part">코드만 준비</span></td></tr>
+</tbody>
+</table>
+
+<h2><span class="n">3</span>데이터가 말하는 핵심 신호</h2>
+<div class="card">
+<p><b>2024년 콜린알포세레이트 청구액의 87.1%가 치매 핵심코드 밖에서 발생했다.</b> 금액 1위 상병은 알츠하이머 치매가 아니라 <span class="warnc">본태성 고혈압(I10)</span>이었다. 2020년 정부가 "치매 외 효능 근거 미흡"으로 본인부담률을 30%→80%로 올렸는데도, 청구 구조는 여전히 비치매 상병에 넓게 얹혀 있다.</p>
+</div>
+<table>
+<thead><tr><th>2024 상위 상병</th><th class="num">청구액</th><th style="width:34%">비중</th></tr></thead>
+<tbody>
+<tr><td>I10 본태성 고혈압 <span class="chip">비핵심</span></td><td class="num">571.6억</td><td><span class="bar" style="width:100%"></span></td></tr>
+<tr><td>G30 알츠하이머 치매 <span class="chip" style="color:var(--good)">핵심</span></td><td class="num">374.3억</td><td><span class="bar" style="width:65%;background:var(--good)"></span></td></tr>
+<tr><td>I63 뇌경색증 <span class="chip">비핵심</span></td><td class="num">359.3억</td><td><span class="bar" style="width:63%"></span></td></tr>
+<tr><td>F06 기타 정신장애 <span class="chip">비핵심</span></td><td class="num">265.3억</td><td><span class="bar" style="width:46%"></span></td></tr>
+<tr><td>E11 2형 당뇨병 <span class="chip">비핵심</span></td><td class="num">249.3억</td><td><span class="bar" style="width:44%"></span></td></tr>
+</tbody>
+</table>
+
+<h2><span class="n">4</span>정책 타임라인</h2>
+<div class="card">
+<ul>
+<li><b>2020-08</b> — 콜린알포 본인부담률 30→80% 인상 (선별급여 전환)</li>
+<li><b>2023</b> — 옥시라세탐 임상재평가 효과 입증 실패 / 아세틸엘카르니틴 퇴출</li>
+<li><b>2024-02</b> — 옥시라세탐 회수·폐기 명령, 시장 퇴출</li>
+<li><b>2024-03</b> — 콜린알포 환수처분 취소청구, 대법원 패소 확정</li>
+<li><b>2026</b> — 콜린알포 임상시험 제출기한 도래 (회사 환수부채 인식)</li>
+</ul>
+</div>
+
+<h2><span class="n">5</span>검증이 필요한 것 · 표현의 선</h2>
+<div class="card bad">
+<h3 class="badc">⚠ 수치 불일치 — 확정 전 통일 필요</h3>
+<p>강의안(<code>lesson.html</code>)은 상위 100상병 <b>4,174억 / 비핵심 86.9%</b>로, 대시보드(<code>data.js</code>)는 <b>3,619억 / 87.1%</b>로 적혀 있다. <span class="accent">Claude 재검증 결과 비중(≈87%)은 재현됐으나 절대액이 약 555억 어긋난다</span> — 수집 회차·성분코드 범위(주사제 138130BIJ 포함 여부) 차이로 추정. 보도 인용 전 한 회차로 재수집해 통일할 것.</p>
+</div>
+<div class="card warn">
+<h3>말할 수 있음 vs 아직 위험함</h3>
+<p class="good">✓ "청구 상병 기준으로 비치매 코드의 금액 비중이 크다."<br>✓ "급여 재평가 취지와 실제 청구 구조 사이에 괴리가 보인다."</p>
+<p class="badc">✗ "의사가 효과 없는 약을 알고도 처방했다."<br>✗ "고혈압 치료 목적으로 콜린알포를 썼다." (주·부상병과 처방 목적은 공개자료로 구분 불가)</p>
+</div>
+
+<h2><span class="n">6</span>다음 단계</h2>
+<table>
+<thead><tr><th>우선순위</th><th>할 일</th><th>왜</th></tr></thead>
+<tbody>
+<tr><td><b>1</b></td><td>2015~2023 시계열 추가 수집</td><td>"재평가 후에도 안 줄었다"를 연도 비교로 입증</td></tr>
+<tr><td><b>2</b></td><td>수치 불일치 해소 (성분코드·회차 통일)</td><td>보도 인용 가능한 확정 숫자 확보</td></tr>
+<tr><td><b>3</b></td><td>C트랙(기관종별) 수집 → G패턴 분석</td><td>의원 vs 병원 오리지널 격차 = 가장 강한 정황</td></tr>
+<tr><td><b>4</b></td><td>약가마스터 조인 → 제조사·오리지널 식별</td><td>94품목·52사 중 책임 소재 좁히기</td></tr>
+<tr><td><b>5</b></td><td>정보공개청구 문안 작성</td><td>주·부상병, 기관종, 시군구까지 원자료 확보</td></tr>
+</tbody>
+</table>
+
+<h2><span class="n">7</span>깃허브 정리 체크리스트</h2>
+<div class="card">
+<p class="muted">로컬 <code>~/Downloads/parm</code>이 곧 공개 리포 <code>hira-investigation-public</code>의 작업본이다. 아래는 커밋 전 정리할 항목.</p>
+<ul class="checklist">
+<li><code>LICENSE</code>의 <code>Copyright (c) 2026 [당신 이름]</code> → 실명/필명으로 교체</li>
+<li><code>node_modules/</code>를 <code>.gitignore</code>에 추가 (현재 미추적으로 커밋 위험)</li>
+<li>새 웹앱 <code>dashboard/</code>(대시보드+강의안) 커밋 — <b>"웹앱 깃허브 올리기"</b>의 핵심</li>
+<li>웹 크롤러 <code>src/ingest/hira_web_choline.py</code> 커밋</li>
+<li>수집 데이터 공개 범위 결정: <code>choline_sick.parquet</code>를 올릴지(현재 <code>.gitignore</code>가 <code>data/processed/*</code> 제외 중)</li>
+<li>임시 파일(<code>inspect_*.py/mjs</code>, <code>workbook_*.json/txt</code>) 정리 또는 ignore</li>
+<li>이 중간정리 페이지를 리포에 포함할지 결정</li>
+</ul>
+<p class="muted" style="font-size:12.5px">푸시(공개 게시)는 계정 인증이 필요해 이정환 님이 직접 하거나 승인해야 한다. Claude는 로컬 정리·커밋 준비까지 돕고, 푸시 직전 확인을 받는다.</p>
+</div>
+
+<div class="foot">
+공개자료 기반 실습·취재용. 의료적 효능·개별 처방 적정성·특정 회사의 법적 책임은 공개 통계만으로 단정하지 않는다.
+상병코드 prefix <code>A</code>는 심평원 내부 표기 — 보도 시 ICD-10 표준(예: AI10→I10)으로 변환.
+</div>
+</div>
+</body>
+</html>
